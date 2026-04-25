@@ -19,9 +19,16 @@ Minimum <a href="#memory-consumption">RAM requirements</a>
 # Installation
 
 ```
-$ git clone https://github.com/Isaacdelly/Plutus.git plutus
+$ git clone https://github.com/Litas-dev/Plutus.git plutus
 
-$ cd plutus && pip3 install -r requirements.txt
+$ cd plutus
+
+# Download the database from the original repository
+$ git clone https://github.com/Isaacdelly/Plutus.git temp
+$ mv temp/database ./
+$ rm -rf temp
+
+$ pip3 install -r requirements.txt
 
 $ python3 convert_db.py  # Convert pickle database to SQLite for memory efficiency
 ```
