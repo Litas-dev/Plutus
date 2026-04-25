@@ -7,19 +7,9 @@ import time
 import pickle
 import hashlib
 import argparse
-import importlib.util
 import binascii
 import multiprocessing
 from pathlib import Path
-
-if importlib.util.find_spec('ellipticcurve.privateKey') is None:
-	raise ModuleNotFoundError(
-		"Missing dependency 'ellipticcurve' (from starkbank-ecdsa).\n"
-		"Install in a virtual environment:\n"
-		"  python3 -m venv .venv\n"
-		"  source .venv/bin/activate\n"
-		"  python3 -m pip install -r requirements.txt"
-	)
 from ellipticcurve.privateKey import PrivateKey
 
 DATABASE = Path('database/MAR_23_2019')
