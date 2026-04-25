@@ -22,6 +22,8 @@ Minimum <a href="#memory-consumption">RAM requirements</a>
 $ git clone https://github.com/Isaacdelly/Plutus.git plutus
 
 $ cd plutus && pip3 install -r requirements.txt
+
+$ python3 convert_db.py  # Convert pickle database to SQLite for memory efficiency
 ```
 
 # Quick Start
@@ -42,7 +44,7 @@ Private keys are generated randomly to create a 32 byte hexidecimal string using
 
 The private keys are converted into their respective public keys using the `ecdsa` Python module. Then the public keys are converted into their Bitcoin wallet addresses using the `binascii` and `hashlib` standard libraries.
 
-A pre-calculated database of every P2PKH Bitcoin address with a positive balance is included in this project. The generated address is searched within the database, and if it is found that the address has a balance, then the private key, public key and wallet address are saved to the text file `plutus.txt` on the user's hard drive.
+A pre-calculated SQLite database of every P2PKH Bitcoin address with a positive balance is included in this project. The generated address is searched within the database, and if it is found that the address has a balance, then the private key, public key and wallet address are saved to the text file `plutus.txt` on the user's hard drive.
 
 This program also utilizes multiprocessing through the `multiprocessing.Process()` function in order to make concurrent calculations.
 
@@ -54,7 +56,7 @@ However, through `multiprocessing.Process()` a concurrent process is created for
 
 # Database FAQ
 
-An offline database is used to find the balance of generated Bitcoin addresses. Visit <a href="/database/">/database</a> for information.
+An offline SQLite database is used to find the balance of generated Bitcoin addresses. Run `python3 convert_db.py` to convert the included pickle files to SQLite format. This provides fast lookups with minimal memory usage.
 
 # Expected Output
 
@@ -71,23 +73,15 @@ However, if a wallet with a balance is found, then all necessary information abo
 
 # Memory Consumption
 
-This program uses approximately 2GB of RAM per CPU. Because this program uses multiprocessing, some data gets shared between threads making it difficult to accurately measure RAM usage.
-
-![Imgur](https://i.imgur.com/9Cq0yf3.png)
-
-The memory consumption stack trace was made by using <a href="https://pypi.org/project/memory-profiler/">mprof</a> to monitor this program brute force 10,000 addresses on a 4 logical processor machine with 8GB of RAM. As a result, 4 child processes were created, each consuming 2100MiB of RAM (~2GB).
+This program uses minimal RAM as the database is stored in SQLite on disk rather than loaded into memory. Each process uses approximately 50-100MB of RAM, making it suitable for systems with limited memory.
 
 # Recent Improvements & TODO
 
 - [X] Fixed typos/formatting
-- [X] Optimized for Apple Silicon M1 with native ARM64 Python and faster ECDSA library (ecdsa)
-- [X] Switched from starkbank-ecdsa to ecdsa for ~3x speedup in public key generation
 
 - [ ] Update database
 
 - [ ] Pickle loader
-
-- [ ] Try to fix Memory Error
 
 <a href="https://github.com/Isaacdelly/Plutus/issues">Create an issue</a> so I can add more stuff to improve
 

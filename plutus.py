@@ -7,9 +7,10 @@ import pickle
 import hashlib
 import binascii
 import multiprocessing
+import sqlite3
 from ecdsa import SigningKey, SECP256k1
 
-DATABASE = r'database/MAR_23_2019/'
+DATABASE = 'plutus.db'
 
 def generate_private_key(): 
 	"""
@@ -52,7 +53,7 @@ def public_key_to_address(public_key):
 	for i in range(count): output.append(alphabet[0])
 	return ''.join(output[::-1])
 
-def process(private_key, public_key, address, database):
+def process(private_key, public_key, address, db_conn):
 	"""
 	Accept an address and query the database. If the address is found in the 
 	database, then it is assumed to have a balance and the wallet data is 
@@ -60,10 +61,9 @@ def process(private_key, public_key, address, database):
 	is assumed to be empty and printed to the user.
 	Average Time: 0.0000026941 seconds
 	"""
-	if address in database[0] or \
-	   address in database[1] or \
-	   address in database[2] or \
-	   address in database[3]:
+	c = db_conn.cursor()
+	c.execute('SELECT 1 FROM addresses WHERE address = ? LIMIT 1', (address,))
+	if c.fetchone():
 		with open('plutus.txt', 'a') as file:
 			file.write('hex private key: ' + str(private_key) + '\n' +
 				   'WIF private key: ' + str(private_key_to_WIF(private_key)) + '\n' +
@@ -95,7 +95,7 @@ def private_key_to_WIF(private_key):
 		else: break
 	return chars[0] * pad + result
 
-def main(database):
+def main(db_conn):
 	"""
 	Create the main pipeline by using an infinite loop to repeatedly call the 
 	functions, while utilizing multiprocessing from __main__. Because all the 
@@ -106,34 +106,20 @@ def main(database):
 		private_key = generate_private_key()			# 0.0000061659 seconds
 		public_key = private_key_to_public_key(private_key) 	# 0.001083 seconds
 		address = public_key_to_address(public_key)		# 0.0000801390 seconds
-		process(private_key, public_key, address, database) 	# 0.0000026941 seconds
+		process(private_key, public_key, address, db_conn) 	# 0.0000026941 seconds
 									# --------------------
 									# 0.00117 seconds
 
 if __name__ == '__main__':
 	"""
-	Deserialize the database and read into a list of sets for easier selection 
-	and O(1) complexity. Initialize the multiprocessing to target the main 
+	Connect to the SQLite database. Initialize the multiprocessing to target the main 
 	function with cpu_count() concurrent processes.
 	"""
-	database = [set() for _ in range(4)]
-	count = len(os.listdir(DATABASE))
-	half = count // 2
-	quarter = half // 2
-	for c, p in enumerate(os.listdir(DATABASE)):
-		print('\rreading database: ' + str(c + 1) + '/' + str(count), end = ' ')
-		with open(DATABASE + p, 'rb') as file:
-			if c < half:
-				if c < quarter: database[0] = database[0] | pickle.load(file)
-				else: database[1] = database[1] | pickle.load(file)
-			else:
-				if c < half + quarter: database[2] = database[2] | pickle.load(file)
-				else: database[3] = database[3] | pickle.load(file)
-	print('DONE')
-
-	# To verify the database size, remove the # from the line below
-	#print('database size: ' + str(sum(len(i) for i in database))); quit()
+	if not os.path.exists(DATABASE):
+		print("Database not found. Please run convert_db.py first.")
+		exit(1)
 
 	for cpu in range(multiprocessing.cpu_count()):
-		multiprocessing.Process(target = main, args = (database, )).start()
+		conn = sqlite3.connect(DATABASE)
+		multiprocessing.Process(target = main, args = (conn, )).start()
 
