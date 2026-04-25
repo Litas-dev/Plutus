@@ -16,17 +16,45 @@ Minimum <a href="#memory-consumption">RAM requirements</a>
 
 # Installation
 
+Create and activate a virtual environment first (recommended on macOS/Homebrew Python due PEP 668):
+
+```
+$ python3 -m venv .venv
+$ source .venv/bin/activate
+```
+
+Then install dependencies:
+
 ```
 $ git clone https://github.com/Isaacdelly/Plutus.git plutus
 
-$ cd plutus && pip3 install -r requirements.txt
+$ cd plutus && python3 -m pip install -r requirements.txt
 ```
+
+If you get `ModuleNotFoundError: No module named 'ellipticcurve'`, install dependencies inside your active virtual environment with:
+
+```
+$ python3 -m pip install -r requirements.txt
+```
+
+If you see `error: externally-managed-environment`, it means you are using a system-managed Python (PEP 668). Activate a virtual environment and run install commands there.
 
 # Quick Start
 
 ```
 $ python3 plutus.py
 ```
+
+Optional runtime flags:
+
+```
+$ python3 plutus.py --workers 4 --report-every 10000
+```
+
+- `--database`: Set a custom folder containing `.pickle` database files.
+- `--workers`: Set worker process count (default: CPU count).
+- `--print-addresses`: Print each checked empty address (off by default for better speed).
+- `--report-every`: Print per-process progress every N checked addresses.
 
 # Proof Of Concept
 
