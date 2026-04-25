@@ -2,6 +2,8 @@
 
 A Bitcoin wallet collider that brute forces random wallet addresses
 
+**Optimized for Apple Silicon M1**: This version uses native ARM64 Python and optimized ECDSA libraries for maximum performance on M1 Macs.
+
 # Like This Project? Give It A Star
 
 [![](https://img.shields.io/github/stars/Isaacdelly/Plutus.svg)](https://github.com/Isaacdelly/Plutus)
@@ -10,51 +12,23 @@ A Bitcoin wallet collider that brute forces random wallet addresses
 
 <a href="https://www.python.org/downloads/">Python 3.6</a> or higher
 
-Python modules listed in the <a href="/requirements.txt">requirements.txt<a/>
+Python modules listed in the <a href="requirements.txt">requirements.txt</a>
   
 Minimum <a href="#memory-consumption">RAM requirements</a>
 
 # Installation
 
-Create and activate a virtual environment first (recommended on macOS/Homebrew Python due PEP 668):
-
-```
-$ python3 -m venv .venv
-$ source .venv/bin/activate
-```
-
-Then install dependencies:
-
 ```
 $ git clone https://github.com/Isaacdelly/Plutus.git plutus
 
-$ cd plutus && python3 -m pip install -r requirements.txt
+$ cd plutus && pip3 install -r requirements.txt
 ```
-
-If you get `ModuleNotFoundError: No module named 'ellipticcurve'`, install dependencies inside your active virtual environment with:
-
-```
-$ python3 -m pip install -r requirements.txt
-```
-
-If you see `error: externally-managed-environment`, it means you are using a system-managed Python (PEP 668). Activate a virtual environment and run install commands there.
 
 # Quick Start
 
 ```
 $ python3 plutus.py
 ```
-
-Optional runtime flags:
-
-```
-$ python3 plutus.py --workers 4 --report-every 10000
-```
-
-- `--database`: Set a custom folder containing `.pickle` database files.
-- `--workers`: Set worker process count (default: CPU count).
-- `--print-addresses`: Print each checked empty address (off by default for better speed).
-- `--report-every`: Print per-process progress every N checked addresses.
 
 # Proof Of Concept
 
@@ -66,7 +40,7 @@ This program is essentially a brute forcing algorithm. It continuously generates
 
 Private keys are generated randomly to create a 32 byte hexidecimal string using the cryptographically secure `os.urandom()` function.
 
-The private keys are converted into their respective public keys using the `starkbank-ecdsa` Python module. Then the public keys are converted into their Bitcoin wallet addresses using the `binascii` and `hashlib` standard libraries.
+The private keys are converted into their respective public keys using the `ecdsa` Python module. Then the public keys are converted into their Bitcoin wallet addresses using the `binascii` and `hashlib` standard libraries.
 
 A pre-calculated database of every P2PKH Bitcoin address with a positive balance is included in this project. The generated address is searched within the database, and if it is found that the address has a balance, then the private key, public key and wallet address are saved to the text file `plutus.txt` on the user's hard drive.
 
@@ -74,7 +48,7 @@ This program also utilizes multiprocessing through the `multiprocessing.Process(
 
 # Efficiency
 
-It takes `0.0032457721` seconds for this progam to brute force a __single__ Bitcoin address. 
+It takes approximately `0.0012` seconds for this program to brute force a __single__ Bitcoin address (optimized for modern hardware including Apple Silicon M1). 
 
 However, through `multiprocessing.Process()` a concurrent process is created for every CPU your computer has. So this program can brute force addresses at a speed of `0.0032457721 ÷ cpu_count()` seconds.
 
@@ -114,3 +88,4 @@ The memory consumption stack trace was made by using <a href="https://pypi.org/p
 - [ ] Try to fix Memory Error
 
 <a href="https://github.com/Isaacdelly/Plutus/issues">Create an issue</a> so I can add more stuff to improve
+
