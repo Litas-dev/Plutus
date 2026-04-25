@@ -28,6 +28,17 @@ $ cd plutus && pip3 install -r requirements.txt
 $ python3 plutus.py
 ```
 
+Optional runtime flags:
+
+```
+$ python3 plutus.py --workers 4 --report-every 10000
+```
+
+- `--database`: Set a custom folder containing `.pickle` database files.
+- `--workers`: Set worker process count (default: CPU count).
+- `--print-addresses`: Print each checked empty address (off by default for better speed).
+- `--report-every`: Print per-process progress every N checked addresses.
+
 # Proof Of Concept
 
 A private key is a secret number that allows Bitcoins to be spent. If a wallet has Bitcoins in it, then the private key will allow a person to control the wallet and spend whatever balance the wallet has. So this program attempts to find Bitcoin private keys that correlate to wallets with positive balances. However, because it is impossible to know which private keys control wallets with money and which private keys control empty wallets, we have to randomly look at every possible private key that exists and hope to find one that has a balance.

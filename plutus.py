@@ -3,13 +3,16 @@
 # https://github.com/Isaacdelly/Plutus
 
 import os
+import time
 import pickle
 import hashlib
+import argparse
 import binascii
 import multiprocessing
+from pathlib import Path
 from ellipticcurve.privateKey import PrivateKey
 
-DATABASE = r'database/MAR_23_2019/'
+DATABASE = Path('database/MAR_23_2019')
 
 def generate_private_key(): 
 	"""
@@ -59,17 +62,14 @@ def process(private_key, public_key, address, database):
 	is assumed to be empty and printed to the user.
 	Average Time: 0.0000026941 seconds
 	"""
-	if address in database[0] or \
-	   address in database[1] or \
-	   address in database[2] or \
-	   address in database[3]:
+	if any(address in partition for partition in database):
 		with open('plutus.txt', 'a') as file:
 			file.write('hex private key: ' + str(private_key) + '\n' +
 				   'WIF private key: ' + str(private_key_to_WIF(private_key)) + '\n' +
 			      	   'public key: ' + str(public_key) + '\n' +
 			           'address: ' + str(address) + '\n\n')
-	else: 
-		print(str(address))
+		return True
+	return False
 
 def private_key_to_WIF(private_key):
 	"""
@@ -94,34 +94,45 @@ def private_key_to_WIF(private_key):
 		else: break
 	return chars[0] * pad + result
 
-def main(database):
+def main(database, print_addresses=False, report_every=0):
 	"""
 	Create the main pipeline by using an infinite loop to repeatedly call the 
 	functions, while utilizing multiprocessing from __main__. Because all the 
 	functions are relatively fast, it is better to combine them all into 
 	one process.
 	"""
+	count = 0
+	start = time.time()
 	while True:
 		private_key = generate_private_key()			# 0.0000061659 seconds
 		public_key = private_key_to_public_key(private_key) 	# 0.0031567731 seconds
 		address = public_key_to_address(public_key)		# 0.0000801390 seconds
-		process(private_key, public_key, address, database) 	# 0.0000026941 seconds
+		found = process(private_key, public_key, address, database) 	# 0.0000026941 seconds
+		count += 1
+		if print_addresses and not found:
+			print(str(address))
+		if report_every and count % report_every == 0:
+			elapsed = max(time.time() - start, 1e-9)
+			print(f'pid={os.getpid()} checked={count} rate={count/elapsed:.2f}/s')
 									# --------------------
 									# 0.0032457721 seconds
 
-if __name__ == '__main__':
+def load_database(database_dir):
 	"""
 	Deserialize the database and read into a list of sets for easier selection 
-	and O(1) complexity. Initialize the multiprocessing to target the main 
-	function with cpu_count() concurrent processes.
+	and O(1) complexity.
 	"""
 	database = [set() for _ in range(4)]
-	count = len(os.listdir(DATABASE))
+	files = sorted(database_dir.glob('*.pickle'))
+	count = len(files)
+	if count == 0:
+		raise FileNotFoundError(f'No .pickle files found in database path: {database_dir}')
+
 	half = count // 2
 	quarter = half // 2
-	for c, p in enumerate(os.listdir(DATABASE)):
+	for c, file_path in enumerate(files):
 		print('\rreading database: ' + str(c + 1) + '/' + str(count), end = ' ')
-		with open(DATABASE + p, 'rb') as file:
+		with file_path.open('rb') as file:
 			if c < half:
 				if c < quarter: database[0] = database[0] | pickle.load(file)
 				else: database[1] = database[1] | pickle.load(file)
@@ -129,10 +140,60 @@ if __name__ == '__main__':
 				if c < half + quarter: database[2] = database[2] | pickle.load(file)
 				else: database[3] = database[3] | pickle.load(file)
 	print('DONE')
+	return tuple(database)
+
+def parse_args():
+	parser = argparse.ArgumentParser(description='Plutus Bitcoin Brute Forcer')
+	parser.add_argument(
+		'--database',
+		default=str(DATABASE),
+		help='Path to folder containing .pickle address files (default: database/MAR_23_2019)'
+	)
+	parser.add_argument(
+		'--workers',
+		type=int,
+		default=multiprocessing.cpu_count(),
+		help='Number of worker processes to start (default: cpu_count)'
+	)
+	parser.add_argument(
+		'--print-addresses',
+		action='store_true',
+		help='Print each checked empty address (disabled by default for better performance)'
+	)
+	parser.add_argument(
+		'--report-every',
+		type=int,
+		default=0,
+		help='Print progress every N generated addresses in each worker (default: disabled)'
+	)
+	return parser.parse_args()
+
+if __name__ == '__main__':
+	"""
+	Initialize the multiprocessing to target the main function with a configurable
+	number of concurrent processes.
+	"""
+	args = parse_args()
+	database_path = Path(args.database)
+	database = load_database(database_path)
 
 	# To verify the database size, remove the # from the line below
 	#print('database size: ' + str(sum(len(i) for i in database))); quit()
 
-	for cpu in range(multiprocessing.cpu_count()):
-		multiprocessing.Process(target = main, args = (database, )).start()
+	processes = []
+	for _ in range(max(args.workers, 1)):
+		proc = multiprocessing.Process(
+			target=main,
+			args=(database, args.print_addresses, args.report_every),
+		)
+		processes.append(proc)
+		proc.start()
 
+	try:
+		for proc in processes:
+			proc.join()
+	except KeyboardInterrupt:
+		for proc in processes:
+			proc.terminate()
+		for proc in processes:
+			proc.join()
