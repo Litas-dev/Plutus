@@ -1,3 +1,4 @@
+#!/usr/bin/env pypy3
 # Plutus Bitcoin Brute Forcer
 # Made by Isaac Delly
 # https://github.com/Isaacdelly/Plutus
