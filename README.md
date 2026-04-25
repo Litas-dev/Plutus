@@ -10,7 +10,7 @@ A Bitcoin wallet collider that brute forces random wallet addresses
 
 # Dependencies
 
-<a href="https://www.python.org/downloads/">Python 3.6</a> or higher
+<a href="https://www.python.org/downloads/">Python 3.6</a> or higher (tested with Python 3.14 on Apple Silicon M1)
 
 Python modules listed in the <a href="requirements.txt">requirements.txt</a>
   
@@ -50,7 +50,7 @@ This program also utilizes multiprocessing through the `multiprocessing.Process(
 
 It takes approximately `0.0012` seconds for this program to brute force a __single__ Bitcoin address (optimized for modern hardware including Apple Silicon M1). 
 
-However, through `multiprocessing.Process()` a concurrent process is created for every CPU your computer has. So this program can brute force addresses at a speed of `0.0032457721 ÷ cpu_count()` seconds.
+However, through `multiprocessing.Process()` a concurrent process is created for every CPU your computer has. So this program can brute force addresses at a rate of `cpu_count() ÷ 0.0012` addresses per second.
 
 # Database FAQ
 
@@ -80,6 +80,8 @@ The memory consumption stack trace was made by using <a href="https://pypi.org/p
 # Recent Improvements & TODO
 
 - [X] Fixed typos/formatting
+- [X] Optimized for Apple Silicon M1 with native ARM64 Python and faster ECDSA library (ecdsa)
+- [X] Switched from starkbank-ecdsa to ecdsa for ~3x speedup in public key generation
 
 - [ ] Update database
 
