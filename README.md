@@ -123,10 +123,5 @@ This project is open-source. See LICENSE file for details.
 ## ⭐ Star This Repo
 
 If you find this project interesting, give it a star!
-<<<<<<< HEAD
-=======
-
-[![](https://img.shields.io/github/stars/Litas-dev/Plutus.svg)](https://github.com/Litas-dev/Plutus)
->>>>>>> 394e387 (Complete modernization: Apple Silicon optimization, SQLite database, ecdsa library, multiprocessing fix, and comprehensive README rewrite)
 
 [![](https://img.shields.io/github/stars/Litas-dev/Plutus.svg)](https://github.com/Litas-dev/Plutus)
