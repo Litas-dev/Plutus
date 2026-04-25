@@ -95,18 +95,19 @@ def private_key_to_WIF(private_key):
 		else: break
 	return chars[0] * pad + result
 
-def main(db_conn):
+def main():
 	"""
 	Create the main pipeline by using an infinite loop to repeatedly call the 
 	functions, while utilizing multiprocessing from __main__. Because all the 
 	functions are relatively fast, it is better to combine them all into 
 	one process.
 	"""
+	conn = sqlite3.connect(DATABASE)
 	while True:
 		private_key = generate_private_key()			# 0.0000061659 seconds
 		public_key = private_key_to_public_key(private_key) 	# 0.001083 seconds
 		address = public_key_to_address(public_key)		# 0.0000801390 seconds
-		process(private_key, public_key, address, db_conn) 	# 0.0000026941 seconds
+		process(private_key, public_key, address, conn) 	# 0.0000026941 seconds
 									# --------------------
 									# 0.00117 seconds
 
@@ -120,6 +121,5 @@ if __name__ == '__main__':
 		exit(1)
 
 	for cpu in range(multiprocessing.cpu_count()):
-		conn = sqlite3.connect(DATABASE)
-		multiprocessing.Process(target = main, args = (conn, )).start()
+		multiprocessing.Process(target = main).start()
 

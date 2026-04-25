@@ -54,6 +54,21 @@ This software is for educational purposes only. Brute-forcing Bitcoin private ke
    # Convert to SQLite (this takes ~5-10 minutes)
    python3 convert_db.py
    ```
+2. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Download and convert the database**:
+   ```bash
+   # Download database from original repository
+   git clone --depth 1 https://github.com/Isaacdelly/Plutus.git temp
+   mv temp/database ./
+   rm -rf temp
+
+   # Convert to SQLite (this takes ~5-10 minutes)
+   python3 convert_db.py
+   ```
 
    The conversion creates `plutus.db` (~8GB) containing 55+ million addresses with known balances.
 
@@ -108,5 +123,10 @@ This project is open-source. See LICENSE file for details.
 ## ⭐ Star This Repo
 
 If you find this project interesting, give it a star!
+<<<<<<< HEAD
+=======
+
+[![](https://img.shields.io/github/stars/Litas-dev/Plutus.svg)](https://github.com/Litas-dev/Plutus)
+>>>>>>> 394e387 (Complete modernization: Apple Silicon optimization, SQLite database, ecdsa library, multiprocessing fix, and comprehensive README rewrite)
 
 [![](https://img.shields.io/github/stars/Litas-dev/Plutus.svg)](https://github.com/Litas-dev/Plutus)
