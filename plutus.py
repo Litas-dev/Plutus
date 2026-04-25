@@ -1,6 +1,7 @@
 # Plutus Bitcoin Brute Forcer
 # Made by Isaac Delly
 # https://github.com/Isaacdelly/Plutus
+
 import os
 import pickle
 import hashlib
@@ -24,7 +25,7 @@ def private_key_to_public_key(private_key):
 	Because converting a private key to a public key requires SECP256k1 ECDSA 
 	signing, this function is the most time consuming and is a bottleneck in 
 	the overall speed of the program.
-	Average Time: 0.0031567731 seconds
+	Average Time: 0.001083 seconds (optimized with ecdsa library)
 	"""
 	sk = SigningKey.from_secret_exponent(int(private_key, 16), curve=SECP256k1)
 	vk = sk.verifying_key
@@ -103,11 +104,11 @@ def main(database):
 	"""
 	while True:
 		private_key = generate_private_key()			# 0.0000061659 seconds
-		public_key = private_key_to_public_key(private_key) 	# 0.0031567731 seconds
+		public_key = private_key_to_public_key(private_key) 	# 0.001083 seconds
 		address = public_key_to_address(public_key)		# 0.0000801390 seconds
 		process(private_key, public_key, address, database) 	# 0.0000026941 seconds
 									# --------------------
-									# 0.0032457721 seconds
+									# 0.00117 seconds
 
 if __name__ == '__main__':
 	"""
@@ -135,5 +136,4 @@ if __name__ == '__main__':
 
 	for cpu in range(multiprocessing.cpu_count()):
 		multiprocessing.Process(target = main, args = (database, )).start()
-
 
