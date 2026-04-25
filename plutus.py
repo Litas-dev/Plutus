@@ -1,7 +1,6 @@
 # Plutus Bitcoin Brute Forcer
 # Made by Isaac Delly
 # https://github.com/Isaacdelly/Plutus
-
 import os
 import pickle
 import hashlib
